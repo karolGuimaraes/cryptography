@@ -10,23 +10,19 @@ caesar_cipher = Blueprint('caesarcipher', __name__)
 TOKEN = getenv('TOKEN')
 
 @caesar_cipher.route('/')
-@caesar_cipher.route('/listar', methods=['GET'])
-def listar_planetas():
-    get_encrypted()
-    return ("oiiiiiiiiiii")
-
-
 def get_encrypted():
     response = requests.get('https://api.codenation.dev/v1/challenge/dev-ps/generate-data?token={}'.format(TOKEN))
     data = response.json()
     answer = get_answer()
-    answer['numero_casas'] = 3
+    answer['numero_casas'] = data['numero_casas']
     answer['token'] = TOKEN
     answer['cifrado'] = data['cifrado']
+    answer['decifrado'] = decipherer(answer)
+    answer['resumo_criptografico'] = hashlib.sha1((answer['decifrado']).encode('utf-8')).hexdigest()
     update_answer(answer)
-    decipherer(answer)
+    return submit_answer()
 
-
+    
 def get_answer():
     file = open('caesar_cipher/answer.json', 'r')
     answer = json.load(file)
@@ -48,9 +44,15 @@ def decipherer(answer):
             decifrado += letters[ (letters.index(letter) - answer['numero_casas']) % 26 ]
         else:
             decifrado += letter
-
     return decifrado
 
-#def cryptographic_summary():
 
+def submit_answer():
+    with open('caesar_cipher/answer.json', 'rb') as answer:
+        response = requests.post(
+            'https://api.codenation.dev/v1/challenge/dev-ps/submit-solution?token={}'.format(TOKEN),
+            files={'answer': answer},
+        )
+    data = response.json()
+    return(data)
 
