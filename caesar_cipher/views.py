@@ -40,10 +40,7 @@ def decipherer(answer):
     letters = string.ascii_lowercase
     decifrado = ''
     for letter in answer['cifrado']:
-        if letter in letters:
-            decifrado += letters[ (letters.index(letter) - answer['numero_casas']) % 26 ]
-        else:
-            decifrado += letter
+        decifrado += letter if not letter in letters else letters[ (letters.index(letter) - answer['numero_casas']) % 26 ]
     return decifrado
 
 
